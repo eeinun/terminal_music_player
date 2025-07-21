@@ -1,5 +1,5 @@
 .venv
 .idea
 __pycache__
-music
-*.txt
+music/*
+music.txt

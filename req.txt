@@ -1,0 +1,21 @@
+음악을 재생: MusicManager -> Player -> ffplay
+앞으로: Player
+뒤로: MusicManager
+정지/계속: (KeyListener) -> Player
+볼륨 증감: Not possible for realtime. Need to recreate ffplay process.
+
+To Do:
+cross platform test:
+    window: ok
+    linux: unknown
+    apple mac: unknown
+
+yt-dlp attach
+    - link to play
+    - extracted audio store (or can set to be saved temporarily)
+
+가사
+    - import lyrics or recognize embedded lyrics
+    - auto generate lyrics by whisper
+
+
