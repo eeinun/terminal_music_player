@@ -1,4 +1,8 @@
 import sys
+if sys.platform.startswith("win"):
+    import msvcrt
+else:
+    import select
 from enum import Enum
 
 class WindowKey(Enum):
@@ -36,7 +40,6 @@ class KeyListener:
         return self._detect()
 
 class WindowKeyListener(KeyListener):
-    import msvcrt
     def __init__(self):
         super().__init__()
         self.keys = WindowKey
@@ -51,7 +54,6 @@ class WindowKeyListener(KeyListener):
             return None
 
 class UnixKeyListener(KeyListener):
-    import select
     def __init__(self):
         super().__init__()
         self.keys = UnixKey
