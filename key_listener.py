@@ -43,7 +43,6 @@ class KeyListener:
         if key is None:
             return
         if key in self.event_action_table:
-            print(f"[{key}]")
             self.event_action_table[key]()
 
     def mirror(self):
@@ -55,8 +54,10 @@ class WindowKeyListener(KeyListener):
         self.keys = WindowKey
 
     def _detect(self):
-        if msvcrt.kbhit():
-            k = msvcrt.getch()
+        k = b''
+        while msvcrt.kbhit():
+            k += msvcrt.getch()
+        if len(k):
             return k
         else:
             return None
