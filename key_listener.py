@@ -41,9 +41,10 @@ class KeyListener:
     def handle(self):
         key = self._detect()
         if key is None:
-            return
+            return True, True
         if key in self.event_action_table:
-            self.event_action_table[key]()
+            return self.event_action_table[key]()
+        return True, True
 
     def mirror(self):
         return self._detect()

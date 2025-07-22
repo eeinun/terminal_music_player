@@ -67,6 +67,7 @@ class Player:
             self.k.keys.RIGHT.value: self.skip_music,
             self.k.keys.LEFT.value: self.replay
         }
+        self.k.event_action_table = self.event_action_table
 
     def get_command(self):
         return ['ffplay', '-nodisp', '-autoexit', '-af', 'volume=0.1', self.current_music]
@@ -84,6 +85,7 @@ class Player:
         )
         self.p = psutil.Process(self.proc.pid)
 
+    # action functions. <loop continue signal>, <program continue signal>
     def pause_music(self):
         if self.playing:
             self.playing = False
@@ -105,12 +107,7 @@ class Player:
         self.dispatch_player()
         return True, True
 
-    def process_key_event(self):
-        if kv := self.k.mirror():
-            if kv in self.event_action_table:
-                return self.event_action_table[kv]()
-        return True, True
-
+    # main play loop
     def play_ffplay(self, file_path):
         self.current_music = file_path
         try:
@@ -120,11 +117,11 @@ class Player:
             self.t = time.time()
             while self.proc.poll() is None:
                 # process key event
-                e, w = self.process_key_event()
-                if not e:
-                    break
+                e, w = self.k.handle()
                 if not w:
                     return False
+                if not e:
+                    break
                 # consume one line
                 if not self.playing:
                     continue
