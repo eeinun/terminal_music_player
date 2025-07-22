@@ -126,9 +126,9 @@ class Player:
                 if not w:
                     return False
                 # consume one line
-                line = self.proc.stderr.readline()
                 if not self.playing:
                     continue
+                line = self.proc.stderr.readline()
                 if time.time() - self.t < self.framerate:
                     continue
                 if not line:
