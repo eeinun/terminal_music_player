@@ -7,21 +7,8 @@ else:
     import tty
     import termios
     import atexit
-from enum import Enum
+from constants.keys import UnixKey, WindowKey
 
-class WindowKey(Enum):
-    SPACE = b" "
-    Q = b"q"
-    ESCAPE = b"\xe0"
-    RIGHT = b"\xe0M"
-    LEFT = b"\xe0K"
-
-class UnixKey(Enum):
-    SPACE = b' '
-    Q = b'q'
-    ESCAPE = b'\x1b'
-    RIGHT = b'\x1b[C'
-    LEFT = b'\x1b[D'
 
 class KeyListener:
     def __init__(self):
@@ -91,6 +78,7 @@ class UnixKeyListener(KeyListener):
             key = sys.stdin.read(cnt).encode()
         if len(key):
             return key
+        return None
 
 
 if __name__ == "__main__":

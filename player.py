@@ -5,10 +5,12 @@ import sys
 import time
 import shutil
 import argparse
+
 import psutil
 
 from player_tui import PlayerTUI
 from key_listener import WindowKeyListener, UnixKeyListener
+from constants.signals import PlaySignal
 
 
 def proc_str(string) -> tuple[int, float]:
@@ -52,6 +54,7 @@ def visual_slice(string, w):
     return s
 
 class Player:
+    volume = 0.1
     def __init__(self):
         self.proc = None
         self.k = WindowKeyListener() if sys.platform.startswith("win") else UnixKeyListener()
@@ -65,12 +68,13 @@ class Player:
             self.k.keys.SPACE.value: self.pause_music,
             self.k.keys.Q.value: self.kill_music,
             self.k.keys.RIGHT.value: self.skip_music,
-            self.k.keys.LEFT.value: self.replay
+            self.k.keys.LEFT.value: self.back,
+            self.k.keys.R.value: self.replay
         }
         self.k.event_action_table = self.event_action_table
 
     def get_command(self):
-        return ['ffplay', '-nodisp', '-autoexit', '-af', 'volume=0.1', self.current_music]
+        return ['ffplay', '-nodisp', '-autoexit', '-af', f'volume={self.volume}', self.current_music]
 
     def dispatch_player(self):
         if self.proc is not None:
@@ -85,30 +89,34 @@ class Player:
         )
         self.p = psutil.Process(self.proc.pid)
 
-    # action functions. <loop continue signal>, <program continue signal>
-    def pause_music(self):
+    # action functions. PlaySignal
+    def pause_music(self) -> PlaySignal:
         if self.playing:
             self.playing = False
             self.p.suspend()
         else:
             self.playing = True
             self.p.resume()
-        return True, True
+        return PlaySignal.CONTINUE
 
-    def kill_music(self):
+    def kill_music(self) -> PlaySignal:
         self.p.kill()
-        return False, False
+        return PlaySignal.EXIT
 
-    def skip_music(self):
+    def skip_music(self) -> PlaySignal:
         self.p.kill()
-        return False, True
+        return PlaySignal.SKIP
 
-    def replay(self):
+    def back(self) -> PlaySignal:
+        self.p.kill()
+        return PlaySignal.BACK
+
+    def replay(self) -> PlaySignal:
         self.dispatch_player()
-        return True, True
+        return PlaySignal.REPLAY
 
     # main play loop
-    def play_ffplay(self, file_path):
+    def play(self, file_path):
         self.current_music = file_path
         try:
             self.dispatch_player()
@@ -117,11 +125,16 @@ class Player:
             self.t = time.time()
             while self.proc.poll() is None:
                 # process key event
-                e, w = self.k.handle()
-                if not w:
-                    return False
-                if not e:
+                psig = self.k.handle()
+                # control flow
+                if psig == PlaySignal.EXIT:
+                    return PlaySignal.EXIT
+                if psig == PlaySignal.BACK:
+                    return PlaySignal.BACK
+                if psig == PlaySignal.SKIP:
                     break
+                if psig == PlaySignal.REPLAY:
+                    continue
                 # consume one line
                 if not self.playing:
                     continue
@@ -141,12 +154,12 @@ class Player:
             self.proc = None
         except Exception as e:
             print(f"오류 발생: {e}")
-            return False
+            return PlaySignal.EXIT
         finally:
             if self.proc is not None:
                 self.proc.terminate()
             print("\033[m\033[?25h", end="")
-        return True
+        return PlaySignal.SKIP
 
 
 if __name__ == '__main__':
@@ -154,4 +167,4 @@ if __name__ == '__main__':
     argparser.add_argument('-f', '--file', type=str, required=True, help='file path')
     args = argparser.parse_args()
     player = Player()
-    player.play_ffplay(args.file)
+    player.play(args.file)

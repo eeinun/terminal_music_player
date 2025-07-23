@@ -7,8 +7,9 @@
 To Do:
 cross platform test:
     window: ok
-    linux: unknown
-    apple mac: unknown
+    linux x86: ok
+    linux arm64:
+    mac: unknown
 
 yt-dlp attach
     - link to play
