@@ -19,4 +19,8 @@ yt-dlp attach
     - import lyrics or recognize embedded lyrics
     - auto generate lyrics by whisper
 
+Problems
+    - MusicManger의 backstack 크기에 제한이 없음. 크기를 제한하려면 deque로 바꿔야 함.
+    - 간헐적으로 kill_music 메소드 오작동 (원인 불명)
+
 

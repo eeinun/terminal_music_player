@@ -86,35 +86,43 @@ if __name__ == "__main__":
     kl = None
     if sys.platform.startswith("win"):
         kl = WindowKeyListener()
-        print("Windows 환경입니다.")
+        print("OS: Windows")
     elif sys.platform.startswith("linux") or sys.platform == "darwin":
         kl = UnixKeyListener()
-        print("Linux/macOS 환경입니다.")
+        print("OS: Linux/macOS")
     else:
-        print("지원하지 않는 운영체제입니다.")
+        print("OS: Unknown")
         sys.exit(1)
-
-    print("아무 키나 누르세요 (Q 입력 시 종료, Unix에서는 a/d로 좌우 이동):")
+    env = sys.platform
 
     def on_space_press():
-        print("Spacebar pressed! ({} 환경)".format("Windows" if sys.platform.startswith("win") else "Unix"))
+        print("[SPACE]")
 
     def on_right_press():
-        print("Right action! ({} 환경)".format("Windows" if sys.platform.startswith("win") else "Unix"))
+        print("[ARROW_RIGHT]")
 
     def on_left_press():
-        print("Left action! ({} 환경)".format("Windows" if sys.platform.startswith("win") else "Unix"))
+        print("[ARROW_LEFT]")
 
     def on_q_press():
-        print("Q pressed! Exiting...")
-        sys.exit(0) # atexit에 등록된 함수가 호출되어 터미널이 복원됩니다.
+        print("[Q]")
+
+    def on_r_press():
+        print("[R]")
 
     # 이벤트 등록
     if kl:
         kl.add_event(kl.keys.SPACE.value, on_space_press)
         kl.add_event(kl.keys.Q.value, on_q_press)
+        kl.add_event(kl.keys.R.value, on_r_press)
         kl.add_event(kl.keys.RIGHT.value, on_right_press)
         kl.add_event(kl.keys.LEFT.value, on_left_press)
+
+    print("Registered keys are")
+    for k in kl.event_action_table:
+        print('\t', end='')
+        kl.event_action_table[k]()
+    print()
 
     # 무한 루프에서 키 입력 감지
     try:
@@ -124,8 +132,6 @@ if __name__ == "__main__":
             # 다른 주기적인 작업을 여기에 추가할 수 있습니다.
             time.sleep(0.01) # CPU 과부하 방지
     except KeyboardInterrupt:
-        print("\n프로그램 강제 종료 (Ctrl+C).")
+        print("\nkeyboard interrupt (Ctrl+C)")
     finally:
-        # atexit.register 덕분에 이 블록에서 명시적으로 reset_terminal을 호출할 필요가 없습니다.
-        # 하지만 혹시 모를 경우를 대비하여 (예: 다른 종료 경로) 대비책을 마련할 수 있습니다.
-        pass
+        print("\nProgram terminated.")

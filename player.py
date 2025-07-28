@@ -117,10 +117,12 @@ class Player:
 
     # main play loop
     def play(self, file_path):
+        if file_path is None:
+            return PlaySignal.SKIP
         self.current_music = file_path
         try:
             self.dispatch_player()
-            audio_title = os.path.basename(file_path)
+            audio_title = file_path
             self.pt.set_title(audio_title)
             self.t = time.time()
             while self.proc.poll() is None:

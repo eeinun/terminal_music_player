@@ -7,9 +7,11 @@ from progress_bar import ProgressBar
 def visual_slice(string, w):
     s = ""
     l = 0
-    while len(s) < len(string) and l < w:
-        s += string[l]
-        l += 1 if string[l].isascii() else 2
+    i = 0
+    while len(s) < len(string) and i < len(string) and l < w:
+        s += string[i]
+        l += 1 if string[i].isascii() else 2
+        i += 1
     return s
 
 
@@ -46,7 +48,7 @@ class PlayerTUI:
     def proc_center(self, string):
         self.width = shutil.get_terminal_size().columns
         if visual_len(string) > self.width:
-            title = visual_slice(string, self.width - 7) + "..."
+            title = visual_slice(string, self.width - 5) + "..."
         else:
             title = string
         vl = visual_len(title)
