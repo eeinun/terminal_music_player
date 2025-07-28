@@ -119,6 +119,7 @@ if __name__ == "__main__":
     while True:
         player = Player()
         signal = player.play(current_music)
+        time.sleep(0.2)
         if not signal:
             break
         if signal == PlaySignal.BACK:
@@ -127,4 +128,3 @@ if __name__ == "__main__":
             break
         else:
             current_music = mm.next_music()
-        time.sleep(0.1)

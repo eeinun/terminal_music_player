@@ -61,7 +61,12 @@ class Downloader():
 if __name__ == "__main__":
     import subprocess
     command = ['python', './music_manager.py', '--path', './temp']
-    subprocess.Popen(command, creationflags=subprocess.CREATE_NEW_CONSOLE)
+    if os.name == 'nt':
+        subprocess.Popen(command, creationflags=CREATE_NEW_CONSOLE)
+    elif os.name == 'posix':
+        subprocess.Popen(['gnome-terminal', '--'] + command)
+    else:
+        raise Exception(f"OS not supported: {os.name}")
     dl = Downloader()
     while True:
         url = input("> ")
