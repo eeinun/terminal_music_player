@@ -23,6 +23,7 @@ class Downloader():
             }],
             'outtmpl': os.path.join(self.dir, 'cache/%(title)s.%(ext)s'),
             'replace_metadata_attributes': [('title', x, '_') for x in r'\/|:*?<>"'],
+            'ignoreerrors': True,
             'quiet': True,
         }
         self.ydl_opts_playlist = {
@@ -34,7 +35,8 @@ class Downloader():
         if url.startswith("https://www.youtube.com/playlist?list="):
             urls = []
             with YoutubeDL(self.ydl_opts_playlist) as ydl:
-                urls += [e['url'] for e in ydl.extract_info(url, download=False)['entries']]
+                playlist_info = ydl.extract_info(url, download=False)
+                urls += [e['url'] for e in playlist_info['entries'] if e is not None]
         elif url.startswith("https://www.youtube.com/watch?v=") or url.startswith("https://youtu.be/"):
             urls = [url]
         else:
@@ -46,15 +48,18 @@ class Downloader():
             shutil.rmtree(os.path.join(self.dir, 'cache'))
         os.mkdir(os.path.join(self.dir, 'cache'))
         for u in self.process_url(url):
-            with YoutubeDL(self.ydl_opts_download) as ydl:
-                info = ydl.extract_info(u, download=False)
-                filename = '.'.join(os.path.basename(ydl.prepare_filename(info)).split('.')[:-1])
-                if not os.path.exists(os.path.join(self.dir, filename + ".mp3")):
-                    print(f"Downloading {filename}")
-                    ydl.download([u])
-                    os.rename(os.path.join(self.dir, 'cache', filename + ".mp3"), os.path.join(self.dir, filename + ".mp3"))
-                else:
-                    print(f"{filename} already exists")
+            try:
+                with YoutubeDL(self.ydl_opts_download) as ydl:
+                    info = ydl.extract_info(u, download=False)
+                    filename = '.'.join(os.path.basename(ydl.prepare_filename(info)).split('.')[:-1])
+                    if not os.path.exists(os.path.join(self.dir, filename + ".mp3")):
+                        print(f"Downloading {filename}")
+                        ydl.download([u])
+                        os.rename(os.path.join(self.dir, 'cache', filename + ".mp3"), os.path.join(self.dir, filename + ".mp3"))
+                    else:
+                        print(f"{filename} already exists")
+            except Exception as e:
+                print(f"Failed to download {u}: {e}")
         os.rmdir(os.path.join(self.dir, 'cache'))
 
 
